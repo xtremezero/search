@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Search</title>
+  <title>Search & AI Portal</title>
   <style>
     :root {
       --bg: #090d16;
@@ -51,16 +51,63 @@
     /* Grid Layout for Links */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
     }
 
-    /* AI Agent / Links Cards */
-    .tile {
+    /* Item Wrapper for Checkbox + Button */
+    .item-wrapper {
+      position: relative;
+      display: flex;
+      width: 100%;
+    }
+
+    /* Custom Checkbox styles */
+    .tick-label {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+      cursor: pointer;
+    }
+    
+    .tick-box {
+      display: none;
+    }
+
+    .custom-tick {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid var(--text-muted);
+      border-radius: 4px;
+      background: var(--card-bg);
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .tick-box:checked + .custom-tick {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .tick-box:checked + .custom-tick::after {
+      content: '✔';
+      position: absolute;
+      color: white;
+      font-size: 11px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Button styles (Unified for both AI and Search) */
+    .clickable-area {
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 12px 14px;
+      padding: 14px 28px 14px 14px; /* Extra right padding for checkbox */
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 10px;
@@ -74,10 +121,17 @@
       cursor: pointer;
     }
 
-    .tile:hover {
+    .clickable-area:hover {
       background: var(--card-hover);
       border-color: rgba(255, 255, 255, 0.2);
       transform: translateY(-2px);
+    }
+
+    /* specific styling just to match your original search engine buttons if needed */
+    .engine-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 4px 14px var(--accent-glow);
     }
 
     /* Search Box Section */
@@ -88,8 +142,15 @@
       text-align: center;
     }
 
+    .search-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
     .search-input-container {
       position: relative;
+      flex: 1;
       display: flex;
       align-items: center;
     }
@@ -125,24 +186,23 @@
       display: none;
     }
 
-    /* Search Engine Buttons */
-    .engine-btn {
-      border: 1px solid var(--card-border);
-      background: var(--card-bg);
-      color: var(--text-main);
-      padding: 12px 14px;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      font-weight: 500;
+    .main-search-btn {
+      padding: 0 28px;
+      border-radius: 16px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      font-size: 1.05rem;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
 
-    .engine-btn:hover {
-      background: var(--accent);
-      border-color: var(--accent);
+    .main-search-btn:hover {
+      background: #2563eb;
+      box-shadow: 0 0 24px var(--accent-glow);
       transform: translateY(-2px);
-      box-shadow: 0 4px 14px var(--accent-glow);
     }
 
     .hint {
@@ -154,66 +214,146 @@
 </head>
 <body>
 
-  <!-- UPPER HALF: AI AGENTS & PROVIDERS -->
+  <!-- UPPER HALF: AI AGENTS -->
   <div class="section">
-    <div class="section-header">Search</div>
+    <div class="section-header">AI Agents</div>
     <div class="grid">
-      <a class="tile" href="https://chatgpt.com" target="_blank">ChatGPT</a>
-      <a class="tile" href="https://gemini.google.com" target="_blank">Google Gemini</a>
-      <a class="tile" href="https://claude.ai" target="_blank">Anthropic Claude</a>
-      <a class="tile" href="https://chat.deepseek.com" target="_blank">DeepSeek</a>
-      <a class="tile" href="https://z.ai" target="_blank">Z.AI (Zhipu)</a>
-      <a class="tile" href="https://chat.mistral.ai" target="_blank">Mistral (Le Chat)</a>
-      <a class="tile" href="https://chat.qwen.ai" target="_blank">Alibaba Qwen</a>
-      <a class="tile" href="https://kimi.moonshot.cn" target="_blank">Moonshot Kimi</a>
-      <a class="tile" href="https://www.meta.ai" target="_blank">Meta AI</a>
-      <a class="tile" href="https://x.ai" target="_blank">xAI (Grok)</a>
-      <a class="tile" href="https://www.perplexity.ai" target="_blank">Perplexity</a>
-      <a class="tile" href="https://cohere.com" target="_blank">Cohere</a>
-      <a class="tile" href="https://tii.ae" target="_blank">TII (Falcon)</a>
-      <a class="tile" href="https://huggingface.co/chat" target="_blank">HuggingChat</a>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area" data-url="https://chatgpt.com/?q=" data-home="https://chatgpt.com">ChatGPT</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area" data-url="https://gemini.google.com/app?q=" data-home="https://gemini.google.com">Google Gemini</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area" data-url="https://claude.ai/new?q=" data-home="https://claude.ai">Anthropic Claude</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area" data-url="https://chat.deepseek.com/?q=" data-home="https://chat.deepseek.com">DeepSeek</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area" data-url="https://chat.mistral.ai/chat?q=" data-home="https://chat.mistral.ai">Mistral (Le Chat)</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area" data-url="https://chat.qwen.ai/?q=" data-home="https://chat.qwen.ai">Alibaba Qwen</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area" data-url="https://kimi.moonshot.cn/?q=" data-home="https://kimi.moonshot.cn">Moonshot Kimi</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area" data-url="https://www.meta.ai/?q=" data-home="https://www.meta.ai">Meta AI</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area" data-url="https://grok.com/?q=" data-home="https://grok.com">xAI (Grok)</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area" data-url="https://www.perplexity.ai/search?q=" data-home="https://www.perplexity.ai">Perplexity</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area" data-url="https://huggingface.co/chat/?q=" data-home="https://huggingface.co/chat">HuggingChat</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area" data-url="https://coral.cohere.com/?q=" data-home="https://cohere.com">Cohere</button>
+      </div>
     </div>
   </div>
 
   <!-- MIDDLE: UNIVERSAL SEARCH BOX -->
   <div class="search-wrapper">
-    <div class="search-input-container">
-      <input
-        type="text"
-        id="search-input"
-        class="search-input"
-        placeholder="Type here to search..."
-        autocomplete="off"
-        autofocus
-      />
-      <button class="clear-btn" id="clear-btn" title="Clear">✕</button>
+    <div class="search-row">
+      <div class="search-input-container">
+        <input type="text" id="search-input" class="search-input" placeholder="Type here to search..." autocomplete="off" autofocus />
+        <button class="clear-btn" id="clear-btn" title="Clear">✕</button>
+      </div>
+      <button class="main-search-btn" id="main-search-btn">Search</button>
     </div>
-    <div class="hint">Type your query, then click any search engine below (or press Enter for Google)</div>
+    <div class="hint">Type your query, select multiple boxes and press Search, OR directly click any button.</div>
   </div>
 
   <!-- BOTTOM HALF: SEARCH ENGINES -->
   <div class="section">
     <div class="section-header">Search Engines</div>
-    <div class="grid" id="engine-grid">
-      <button class="engine-btn" data-url="https://www.google.com/search?q=" data-home="https://www.google.com">Google</button>
-      <button class="engine-btn" data-url="https://www.bing.com/search?q=" data-home="https://www.bing.com">Bing</button>
-      <button class="engine-btn" data-url="https://duckduckgo.com/?q=" data-home="https://duckduckgo.com">DuckDuckGo</button>
-      <button class="engine-btn" data-url="https://search.brave.com/search?q=" data-home="https://search.brave.com">Brave</button>
-      <button class="engine-btn" data-url="https://www.perplexity.ai/search?q=" data-home="https://www.perplexity.ai">Perplexity</button>
-      <button class="engine-btn" data-url="https://search.yahoo.com/search?p=" data-home="https://search.yahoo.com">Yahoo</button>
-      <button class="engine-btn" data-url="https://www.ecosia.org/search?q=" data-home="https://www.ecosia.org">Ecosia</button>
-      <button class="engine-btn" data-url="https://kagi.com/search?q=" data-home="https://kagi.com">Kagi</button>
-      <button class="engine-btn" data-url="https://yandex.com/search/?text=" data-home="https://yandex.com">Yandex</button>
-      <button class="engine-btn" data-url="https://www.baidu.com/s?wd=" data-home="https://www.baidu.com">Baidu</button>
-      <button class="engine-btn" data-url="https://www.startpage.com/sp/search?query=" data-home="https://www.startpage.com">Startpage</button>
-      <button class="engine-btn" data-url="https://search.naver.com/search.naver?query=" data-home="https://www.naver.com">Naver</button>
+    <div class="grid">
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area engine-btn" data-url="https://www.google.com/search?q=" data-home="https://www.google.com">Google</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area engine-btn" data-url="https://www.bing.com/search?q=" data-home="https://www.bing.com">Bing</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area engine-btn" data-url="https://duckduckgo.com/?q=" data-home="https://duckduckgo.com">DuckDuckGo</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area engine-btn" data-url="https://search.brave.com/search?q=" data-home="https://search.brave.com">Brave</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area engine-btn" data-url="https://search.yahoo.com/search?p=" data-home="https://search.yahoo.com">Yahoo</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area engine-btn" data-url="https://www.ecosia.org/search?q=" data-home="https://www.ecosia.org">Ecosia</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area engine-btn" data-url="https://kagi.com/search?q=" data-home="https://kagi.com">Kagi</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area engine-btn" data-url="https://yandex.com/search/?text=" data-home="https://yandex.com">Yandex</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area engine-btn" data-url="https://www.baidu.com/s?wd=" data-home="https://www.baidu.com">Baidu</button>
+      </div>
+      <!-- Item -->
+      <div class="item-wrapper">
+        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
+        <button class="clickable-area engine-btn" data-url="https://www.startpage.com/sp/search?query=" data-home="https://www.startpage.com">Startpage</button>
+      </div>
     </div>
   </div>
 
   <script>
     const searchInput = document.getElementById('search-input');
     const clearBtn = document.getElementById('clear-btn');
-    const engineButtons = document.querySelectorAll('.engine-btn');
+    const mainSearchBtn = document.getElementById('main-search-btn');
 
     // Show/hide clear button
     searchInput.addEventListener('input', () => {
@@ -226,30 +366,49 @@
       searchInput.focus();
     });
 
-    // Execute search for an engine
-    function runSearch(button) {
+    // Function to execute opening a target
+    function openTarget(buttonElement) {
       const query = searchInput.value.trim();
-      const searchUrl = button.getAttribute('data-url');
-      const homeUrl = button.getAttribute('data-home');
+      const searchUrl = buttonElement.getAttribute('data-url');
+      const homeUrl = buttonElement.getAttribute('data-home');
 
-      if (query) {
+      if (query && searchUrl) {
         window.open(searchUrl + encodeURIComponent(query), '_blank');
       } else {
-        // If query is empty, simply visit that engine's homepage
         window.open(homeUrl, '_blank');
       }
     }
 
-    // Attach click events to all engine buttons
-    engineButtons.forEach((btn) => {
-      btn.addEventListener('click', () => runSearch(btn));
+    // Attach click events to all direct-click buttons
+    document.querySelectorAll('.clickable-area').forEach((btn) => {
+      btn.addEventListener('click', () => openTarget(btn));
     });
 
-    // Press Enter to search on Google by default
+    // Execute multiple searches for all checked boxes
+    function executeMultiSearch() {
+      const selectedBoxes = document.querySelectorAll('.tick-box:checked');
+      
+      // If nothing is selected, default to single Google search
+      if (selectedBoxes.length === 0) {
+        const defaultEngine = document.querySelector('[data-home="https://www.google.com"]');
+        openTarget(defaultEngine);
+        return;
+      }
+
+      // Loop through checked boxes and open them
+      selectedBoxes.forEach(box => {
+        const targetBtn = box.closest('.item-wrapper').querySelector('.clickable-area');
+        openTarget(targetBtn);
+      });
+    }
+
+    // Run multi-search when "Search" button is clicked
+    mainSearchBtn.addEventListener('click', executeMultiSearch);
+
+    // Press Enter to trigger the search
     searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        const defaultEngine = document.querySelector('.engine-btn'); // Google (first button)
-        runSearch(defaultEngine);
+        executeMultiSearch();
       }
     });
   </script>

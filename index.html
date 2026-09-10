@@ -16,6 +16,7 @@
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --fluent-radius: 12px;
+      --fallback-bg: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2000&q=80');
     }
 
     * {
@@ -27,13 +28,14 @@
 
     body {
       background: linear-gradient(180deg, rgba(8, 12, 18, 0.72) 0%, rgba(8, 12, 18, 0.85) 100%),
-                  url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2000&q=80') center center / cover fixed no-repeat;
+                  var(--fallback-bg) center center / cover fixed no-repeat;
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       padding: 28px 20px;
+      transition: background-image 0.5s ease-in-out;
     }
 
     .section {
@@ -42,7 +44,7 @@
       margin: 0 auto;
     }
 
-    /* Group Header with Select All / None controls */
+    /* Group Header with Select All / Reset Selection controls */
     .section-header-row {
       display: flex;
       justify-content: space-between;
@@ -66,20 +68,29 @@
     .group-controls {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
+    /* Uniform Action Buttons */
     .action-btn {
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.12);
       color: #cbd5e1;
       font-size: 0.75rem;
       font-weight: 500;
-      padding: 4px 10px;
+      line-height: 1;
+      height: 28px;
+      min-width: 115px;
+      padding: 0 14px;
       border-radius: 14px;
       cursor: pointer;
       backdrop-filter: blur(6px);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
       transition: all 0.2s ease;
+      user-select: none;
     }
 
     .action-btn:hover {
@@ -96,7 +107,7 @@
       margin-top: 10px;
     }
 
-    /* Bing Fluent-style Tile */
+    /* Fluent-style Tile */
     .tile {
       display: flex;
       align-items: stretch;
@@ -110,6 +121,7 @@
       backdrop-filter: blur(16px);
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      height: 44px;
     }
 
     .tile:hover {
@@ -130,9 +142,10 @@
       flex: 1;
       display: flex;
       align-items: center;
-      padding: 11px 13px;
+      padding: 0 12px;
       cursor: pointer;
       user-select: none;
+      min-width: 0;
     }
 
     .tick-box {
@@ -176,7 +189,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
+      width: 42px;
+      min-width: 42px;
       background: transparent;
       border: none;
       border-left: 1px solid var(--card-border);
@@ -190,7 +204,7 @@
       color: #fff;
     }
 
-    /* Central Bing Search Bar */
+    /* Central Search Bar */
     .search-wrapper {
       max-width: 750px;
       width: 100%;
@@ -261,6 +275,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-shrink: 0;
     }
 
     .main-search-btn:hover {
@@ -285,8 +300,8 @@
         AI Chatbots & Agents
       </div>
       <div class="group-controls">
-        <button type="button" class="action-btn" data-action="all" data-target="group-ai">Select all</button>
-        <button type="button" class="action-btn" data-action="none" data-target="group-ai">None</button>
+        <button type="button" class="action-btn" data-action="all" data-target="group-ai">Select All</button>
+        <button type="button" class="action-btn" data-action="none" data-target="group-ai">Reset Selection</button>
       </div>
     </div>
 
@@ -447,7 +462,7 @@
     </div>
   </div>
 
-  <!-- MIDDLE: BING SEARCH BAR -->
+  <!-- MIDDLE: CENTRAL SEARCH BAR -->
   <div class="search-wrapper">
     <div class="search-box">
       <svg class="bing-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
@@ -460,7 +475,7 @@
         <span>Search</span>
       </button>
     </div>
-    <div class="search-tip">Select individual tiles, use <b>Select all</b> per group, or click the magnifying glass to search instantly.</div>
+    <div class="search-tip">Select individual tiles, use <b>Select All</b> per group, or click the magnifying glass to search instantly.</div>
   </div>
 
   <!-- BOTTOM GROUP: SEARCH ENGINES -->
@@ -471,8 +486,8 @@
         Search Engines
       </div>
       <div class="group-controls">
-        <button type="button" class="action-btn" data-action="all" data-target="group-engines">Select all</button>
-        <button type="button" class="action-btn" data-action="none" data-target="group-engines">None</button>
+        <button type="button" class="action-btn" data-action="all" data-target="group-engines">Select All</button>
+        <button type="button" class="action-btn" data-action="none" data-target="group-engines">Reset Selection</button>
       </div>
     </div>
 
@@ -601,6 +616,43 @@
   </div>
 
   <script>
+    /* Daily Cached Background from Bing Image API with Fallback */
+    (function setupDailyBackground() {
+      const CACHE_KEY = 'daily_bg_url';
+      const DATE_KEY = 'daily_bg_date';
+      const today = new Date().toISOString().slice(0, 10);
+
+      const applyBg = (url) => {
+        document.body.style.backgroundImage = `linear-gradient(180deg, rgba(8, 12, 18, 0.72) 0%, rgba(8, 12, 18, 0.85) 100%), url('${url}')`;
+      };
+
+      const cachedUrl = localStorage.getItem(CACHE_KEY);
+      const cachedDate = localStorage.getItem(DATE_KEY);
+
+      if (cachedUrl && cachedDate === today) {
+        applyBg(cachedUrl);
+        return;
+      }
+
+      // Fetch daily Bing picture (via reliable JSON proxy)
+      fetch('https://bing.biturl.top/?resolution=1920&format=json&index=0&mkt=en-US')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.url) {
+            const img = new Image();
+            img.onload = () => {
+              localStorage.setItem(CACHE_KEY, data.url);
+              localStorage.setItem(DATE_KEY, today);
+              applyBg(data.url);
+            };
+            img.src = data.url;
+          }
+        })
+        .catch(() => {
+          // Keep CSS fallback if offline or request fails
+        });
+    })();
+
     const searchInput = document.getElementById('search-input');
     const clearBtn = document.getElementById('clear-btn');
     const mainSearchBtn = document.getElementById('main-search-btn');
@@ -628,7 +680,7 @@
       });
     });
 
-    // "Select All" and "None" handlers per category
+    // "Select All" and "Reset Selection" handlers per category
     document.querySelectorAll('.action-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const targetId = btn.getAttribute('data-target');

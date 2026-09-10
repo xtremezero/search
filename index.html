@@ -3,349 +3,599 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Search & AI Portal</title>
+  <title>Search</title>
   <style>
     :root {
-      --bg: #090d16;
-      --card-bg: rgba(255, 255, 255, 0.04);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --card-hover: rgba(255, 255, 255, 0.12);
-      --accent: #3b82f6;
-      --accent-glow: rgba(59, 130, 246, 0.25);
-      --text-main: #f1f5f9;
+      --bing-blue: #0078d4;
+      --bing-blue-hover: #106ebe;
+      --bing-blue-subtle: rgba(0, 120, 212, 0.18);
+      --card-bg: rgba(23, 27, 34, 0.65);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --card-border-hover: rgba(255, 255, 255, 0.28);
+      --card-hover-bg: rgba(35, 41, 51, 0.85);
+      --text-main: #f8fafc;
       --text-muted: #94a3b8;
+      --fluent-radius: 12px;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
     body {
-      background: radial-gradient(circle at 50% 50%, #131d31 0%, var(--bg) 100%);
+      background: linear-gradient(180deg, rgba(8, 12, 18, 0.72) 0%, rgba(8, 12, 18, 0.85) 100%),
+                  url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2000&q=80') center center / cover fixed no-repeat;
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 24px;
+      padding: 28px 20px;
     }
 
     .section {
-      max-width: 1100px;
+      max-width: 1120px;
       width: 100%;
       margin: 0 auto;
     }
 
-    .section-header {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-      text-align: center;
+    /* Group Header with Select All / None controls */
+    .section-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px 10px 4px;
+      margin-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Grid Layout for Links */
+    .section-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .group-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .action-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 14px;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Grid Layout */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
     }
 
-    /* Item Wrapper for Checkbox + Button */
-    .item-wrapper {
-      position: relative;
+    /* Bing Fluent-style Tile */
+    .tile {
       display: flex;
-      width: 100%;
+      align-items: stretch;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--fluent-radius);
+      color: var(--text-main);
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(16px);
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
-    /* Custom Checkbox styles */
-    .tick-label {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      z-index: 2;
-      cursor: pointer;
+    .tile:hover {
+      background: var(--card-hover-bg);
+      border-color: var(--card-border-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
     }
-    
+
+    .tile.selected {
+      border-color: var(--bing-blue);
+      background: var(--bing-blue-subtle);
+      box-shadow: 0 0 12px rgba(0, 120, 212, 0.3);
+    }
+
+    /* Selection Area (Left side) */
+    .select-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      padding: 11px 13px;
+      cursor: pointer;
+      user-select: none;
+    }
+
     .tick-box {
       display: none;
     }
 
     .custom-tick {
-      display: inline-block;
-      width: 18px;
-      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 17px;
+      height: 17px;
       border: 1.5px solid var(--text-muted);
       border-radius: 4px;
-      background: var(--card-bg);
+      margin-right: 10px;
+      background: rgba(255, 255, 255, 0.05);
       transition: all 0.2s ease;
-      position: relative;
+      flex-shrink: 0;
     }
 
     .tick-box:checked + .custom-tick {
-      background-color: var(--accent);
-      border-color: var(--accent);
+      background-color: var(--bing-blue);
+      border-color: var(--bing-blue);
     }
 
     .tick-box:checked + .custom-tick::after {
       content: '✔';
-      position: absolute;
-      color: white;
+      color: #fff;
       font-size: 11px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
     }
 
-    /* Button styles (Unified for both AI and Search) */
-    .clickable-area {
-      width: 100%;
+    .name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 0.88rem;
+    }
+
+    /* Direct Search Button */
+    .direct-search-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 14px 28px 14px 14px; /* Extra right padding for checkbox */
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      color: var(--text-main);
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-      backdrop-filter: blur(8px);
-      text-align: center;
+      width: 40px;
+      background: transparent;
+      border: none;
+      border-left: 1px solid var(--card-border);
+      color: var(--text-muted);
       cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    .clickable-area:hover {
-      background: var(--card-hover);
-      border-color: rgba(255, 255, 255, 0.2);
-      transform: translateY(-2px);
+    .direct-search-btn:hover {
+      background: var(--bing-blue);
+      color: #fff;
     }
 
-    /* specific styling just to match your original search engine buttons if needed */
-    .engine-btn:hover {
-      background: var(--accent);
-      border-color: var(--accent);
-      box-shadow: 0 4px 14px var(--accent-glow);
-    }
-
-    /* Search Box Section */
+    /* Central Bing Search Bar */
     .search-wrapper {
-      max-width: 720px;
+      max-width: 750px;
       width: 100%;
-      margin: 32px auto;
+      margin: 28px auto;
       text-align: center;
     }
 
-    .search-row {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
-
-    .search-input-container {
+    .search-box {
       position: relative;
-      flex: 1;
       display: flex;
       align-items: center;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 28px;
+      padding: 5px 6px 5px 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      transition: all 0.25s ease;
+    }
+
+    .search-box:focus-within {
+      background: #ffffff;
+      box-shadow: 0 12px 35px rgba(0, 120, 212, 0.35), 0 0 0 2px var(--bing-blue);
+    }
+
+    .bing-search-icon {
+      color: #5c6b73;
+      margin-right: 10px;
+      flex-shrink: 0;
     }
 
     .search-input {
-      width: 100%;
-      padding: 18px 24px;
-      padding-right: 50px;
-      font-size: 1.15rem;
-      background: rgba(15, 23, 42, 0.7);
-      border: 1.5px solid var(--card-border);
-      border-radius: 16px;
-      color: #fff;
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 12px 6px;
+      font-size: 1.05rem;
+      color: #1e293b;
       outline: none;
-      transition: all 0.25s ease;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
 
-    .search-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 24px var(--accent-glow);
-      background: rgba(15, 23, 42, 0.95);
+    .search-input::placeholder {
+      color: #64748b;
     }
 
     .clear-btn {
-      position: absolute;
-      right: 18px;
-      background: none;
+      background: transparent;
       border: none;
-      color: var(--text-muted);
+      color: #94a3b8;
       cursor: pointer;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
+      padding: 0 12px;
       display: none;
     }
 
+    .clear-btn:hover {
+      color: #334155;
+    }
+
     .main-search-btn {
-      padding: 0 28px;
-      border-radius: 16px;
-      background: var(--accent);
-      color: white;
+      padding: 12px 24px;
+      border-radius: 22px;
+      background: var(--bing-blue);
+      color: #ffffff;
       border: none;
-      font-size: 1.05rem;
+      font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      transition: background 0.2s ease, transform 0.1s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .main-search-btn:hover {
-      background: #2563eb;
-      box-shadow: 0 0 24px var(--accent-glow);
-      transform: translateY(-2px);
+      background: var(--bing-blue-hover);
+      transform: scale(1.02);
     }
 
-    .hint {
+    .search-tip {
       font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-top: 8px;
+      color: #94a3b8;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
 
-  <!-- UPPER HALF: AI AGENTS -->
-  <div class="section">
-    <div class="section-header">AI Agents</div>
+  <!-- TOP GROUP: AI CHATBOTS -->
+  <div class="section" id="group-ai">
+    <div class="section-header-row">
+      <div class="section-title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L9.09 9.09L2 12L9.09 14.91L12 22L14.91 14.91L22 12L14.91 9.09L12 2Z"/></svg>
+        AI Chatbots & Agents
+      </div>
+      <div class="group-controls">
+        <button type="button" class="action-btn" data-action="all" data-target="group-ai">Select all</button>
+        <button type="button" class="action-btn" data-action="none" data-target="group-ai">None</button>
+      </div>
+    </div>
+
     <div class="grid">
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area" data-url="https://chatgpt.com/?q=" data-home="https://chatgpt.com">ChatGPT</button>
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">ChatGPT</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://chatgpt.com/?q=" data-home="https://chatgpt.com" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area" data-url="https://gemini.google.com/app?q=" data-home="https://gemini.google.com">Google Gemini</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Google Gemini</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://gemini.google.com/app?q=" data-home="https://gemini.google.com" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area" data-url="https://claude.ai/new?q=" data-home="https://claude.ai">Anthropic Claude</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Anthropic Claude</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://claude.ai/new?q=" data-home="https://claude.ai" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area" data-url="https://chat.deepseek.com/?q=" data-home="https://chat.deepseek.com">DeepSeek</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">DeepSeek</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://chat.deepseek.com/?q=" data-home="https://chat.deepseek.com" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area" data-url="https://chat.mistral.ai/chat?q=" data-home="https://chat.mistral.ai">Mistral (Le Chat)</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Perplexity AI</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://www.perplexity.ai/search?q=" data-home="https://www.perplexity.ai" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area" data-url="https://chat.qwen.ai/?q=" data-home="https://chat.qwen.ai">Alibaba Qwen</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">xAI (Grok)</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://grok.com/?q=" data-home="https://grok.com" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area" data-url="https://kimi.moonshot.cn/?q=" data-home="https://kimi.moonshot.cn">Moonshot Kimi</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Meta AI</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://www.meta.ai/?q=" data-home="https://www.meta.ai" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area" data-url="https://www.meta.ai/?q=" data-home="https://www.meta.ai">Meta AI</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Mistral (Le Chat)</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://chat.mistral.ai/chat?q=" data-home="https://chat.mistral.ai" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area" data-url="https://grok.com/?q=" data-home="https://grok.com">xAI (Grok)</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Alibaba Qwen</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://chat.qwen.ai/?q=" data-home="https://chat.qwen.ai" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area" data-url="https://www.perplexity.ai/search?q=" data-home="https://www.perplexity.ai">Perplexity</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Moonshot Kimi</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://kimi.moonshot.cn/?q=" data-home="https://kimi.moonshot.cn" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area" data-url="https://huggingface.co/chat/?q=" data-home="https://huggingface.co/chat">HuggingChat</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Z.AI (Zhipu)</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://chatglm.cn/main/alltoolsdetail?q=" data-home="https://z.ai" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area" data-url="https://coral.cohere.com/?q=" data-home="https://cohere.com">Cohere</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">HuggingChat</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://huggingface.co/chat/?q=" data-home="https://huggingface.co/chat" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+      </div>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Cohere Coral</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://coral.cohere.com/?q=" data-home="https://cohere.com" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+      </div>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">TII (Falcon)</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://huggingface.co/chat/models/tiiuae/falcon-180B-chat?q=" data-home="https://tii.ae" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- MIDDLE: UNIVERSAL SEARCH BOX -->
+  <!-- MIDDLE: BING SEARCH BAR -->
   <div class="search-wrapper">
-    <div class="search-row">
-      <div class="search-input-container">
-        <input type="text" id="search-input" class="search-input" placeholder="Type here to search..." autocomplete="off" autofocus />
-        <button class="clear-btn" id="clear-btn" title="Clear">✕</button>
-      </div>
-      <button class="main-search-btn" id="main-search-btn">Search</button>
+    <div class="search-box">
+      <svg class="bing-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="search-input" class="search-input" placeholder="Search the web or ask AI..." autocomplete="off" autofocus />
+      <button class="clear-btn" id="clear-btn" title="Clear input">✕</button>
+      <button class="main-search-btn" id="main-search-btn">
+        <span>Search</span>
+      </button>
     </div>
-    <div class="hint">Type your query, select multiple boxes and press Search, OR directly click any button.</div>
+    <div class="search-tip">Select individual tiles, use <b>Select all</b> per group, or click the magnifying glass to search instantly.</div>
   </div>
 
-  <!-- BOTTOM HALF: SEARCH ENGINES -->
-  <div class="section">
-    <div class="section-header">Search Engines</div>
+  <!-- BOTTOM GROUP: SEARCH ENGINES -->
+  <div class="section" id="group-engines">
+    <div class="section-header-row">
+      <div class="section-title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        Search Engines
+      </div>
+      <div class="group-controls">
+        <button type="button" class="action-btn" data-action="all" data-target="group-engines">Select all</button>
+        <button type="button" class="action-btn" data-action="none" data-target="group-engines">None</button>
+      </div>
+    </div>
+
     <div class="grid">
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area engine-btn" data-url="https://www.google.com/search?q=" data-home="https://www.google.com">Google</button>
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Microsoft Bing</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://www.bing.com/search?q=" data-home="https://www.bing.com" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area engine-btn" data-url="https://www.bing.com/search?q=" data-home="https://www.bing.com">Bing</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Google</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://www.google.com/search?q=" data-home="https://www.google.com" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area engine-btn" data-url="https://duckduckgo.com/?q=" data-home="https://duckduckgo.com">DuckDuckGo</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">DuckDuckGo</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://duckduckgo.com/?q=" data-home="https://duckduckgo.com" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area engine-btn" data-url="https://search.brave.com/search?q=" data-home="https://search.brave.com">Brave</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Brave Search</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://search.brave.com/search?q=" data-home="https://search.brave.com" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area engine-btn" data-url="https://search.yahoo.com/search?p=" data-home="https://search.yahoo.com">Yahoo</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Yahoo!</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://search.yahoo.com/search?p=" data-home="https://search.yahoo.com" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area engine-btn" data-url="https://www.ecosia.org/search?q=" data-home="https://www.ecosia.org">Ecosia</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Ecosia</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://www.ecosia.org/search?q=" data-home="https://www.ecosia.org" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area engine-btn" data-url="https://kagi.com/search?q=" data-home="https://kagi.com">Kagi</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Kagi</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://kagi.com/search?q=" data-home="https://kagi.com" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area engine-btn" data-url="https://yandex.com/search/?text=" data-home="https://yandex.com">Yandex</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Startpage</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://www.startpage.com/sp/search?query=" data-home="https://www.startpage.com" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area engine-btn" data-url="https://www.baidu.com/s?wd=" data-home="https://www.baidu.com">Baidu</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Yandex</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://yandex.com/search/?text=" data-home="https://yandex.com" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
-      <!-- Item -->
-      <div class="item-wrapper">
-        <label class="tick-label"><input type="checkbox" class="tick-box"><span class="custom-tick"></span></label>
-        <button class="clickable-area engine-btn" data-url="https://www.startpage.com/sp/search?query=" data-home="https://www.startpage.com">Startpage</button>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Baidu</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://www.baidu.com/s?wd=" data-home="https://www.baidu.com" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+      </div>
+
+      <div class="tile">
+        <label class="select-area">
+          <input type="checkbox" class="tick-box">
+          <span class="custom-tick"></span>
+          <span class="name">Naver</span>
+        </label>
+        <button class="direct-search-btn" data-url="https://search.naver.com/search.naver?query=" data-home="https://www.naver.com" title="Search directly">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
     </div>
   </div>
@@ -355,7 +605,7 @@
     const clearBtn = document.getElementById('clear-btn');
     const mainSearchBtn = document.getElementById('main-search-btn');
 
-    // Show/hide clear button
+    // Show/hide search clear button
     searchInput.addEventListener('input', () => {
       clearBtn.style.display = searchInput.value.length > 0 ? 'block' : 'none';
     });
@@ -366,7 +616,43 @@
       searchInput.focus();
     });
 
-    // Function to execute opening a target
+    // Toggle selected class on tile when checkbox changes
+    document.querySelectorAll('.tick-box').forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        const tile = e.target.closest('.tile');
+        if (e.target.checked) {
+          tile.classList.add('selected');
+        } else {
+          tile.classList.remove('selected');
+        }
+      });
+    });
+
+    // "Select All" and "None" handlers per category
+    document.querySelectorAll('.action-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        const action = btn.getAttribute('data-action');
+        const container = document.getElementById(targetId);
+        
+        if (!container) return;
+
+        const checkboxes = container.querySelectorAll('.tick-box');
+        const shouldSelect = (action === 'all');
+
+        checkboxes.forEach(cb => {
+          cb.checked = shouldSelect;
+          const tile = cb.closest('.tile');
+          if (shouldSelect) {
+            tile.classList.add('selected');
+          } else {
+            tile.classList.remove('selected');
+          }
+        });
+      });
+    });
+
+    // Open single query or direct URL
     function openTarget(buttonElement) {
       const query = searchInput.value.trim();
       const searchUrl = buttonElement.getAttribute('data-url');
@@ -379,33 +665,35 @@
       }
     }
 
-    // Attach click events to all direct-click buttons
-    document.querySelectorAll('.clickable-area').forEach((btn) => {
-      btn.addEventListener('click', () => openTarget(btn));
+    // Direct search buttons
+    document.querySelectorAll('.direct-search-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openTarget(btn);
+      });
     });
 
-    // Execute multiple searches for all checked boxes
+    // Multi-search for all checked checkboxes across groups
     function executeMultiSearch() {
       const selectedBoxes = document.querySelectorAll('.tick-box:checked');
-      
-      // If nothing is selected, default to single Google search
+
+      // Default fallback: Bing search
       if (selectedBoxes.length === 0) {
-        const defaultEngine = document.querySelector('[data-home="https://www.google.com"]');
-        openTarget(defaultEngine);
+        const defaultEngine = document.querySelector('[data-home="https://www.bing.com"]');
+        if (defaultEngine) {
+          openTarget(defaultEngine);
+        }
         return;
       }
 
-      // Loop through checked boxes and open them
       selectedBoxes.forEach(box => {
-        const targetBtn = box.closest('.item-wrapper').querySelector('.clickable-area');
+        const targetBtn = box.closest('.tile').querySelector('.direct-search-btn');
         openTarget(targetBtn);
       });
     }
 
-    // Run multi-search when "Search" button is clicked
     mainSearchBtn.addEventListener('click', executeMultiSearch);
 
-    // Press Enter to trigger the search
     searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         executeMultiSearch();
